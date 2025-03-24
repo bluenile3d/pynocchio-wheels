@@ -1,0 +1,26 @@
+name: Build Wheels
+on: [push]
+jobs:
+  build_wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel
+      - name: Install dependencies (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install cmake ninja
+      - name: Build wheels
+        run: cibuildwheel --output-dir dist
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./dist/*.whl
