@@ -1,0 +1,11 @@
+.idea
+.venv
+.vscode
+pynocchio.egg-info
+__pycache__
+*.pyd
+venv*
+
+build/
+dist/
+.DS_Store
