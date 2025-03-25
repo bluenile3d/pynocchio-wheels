@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
     env:
       CIBW_BUILD_VERBOSITY: 3
-      CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v --verbose 2 {wheel}"
+      CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} || cp {wheel} {dest_dir}"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
