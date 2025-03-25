@@ -9,15 +9,11 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive  # Fetch pybind11 submodule
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Install cibuildwheel
         run: pip install cibuildwheel
-      - name: Install pybind11 fallback
-        run: pip install pybind11  # Fallback if submodule fails
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc g++ libpython3-dev
@@ -28,7 +24,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install cmake ninja -y
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir dist --only cp311-${{ matrix.os == 'windows-latest' && 'win_amd64' || matrix.os == 'macos-latest' && 'macosx_arm64' || 'manylinux_x86_64' }} --build-verbosity 3
+        run: python -m cibuildwheel --output-dir dist --only cp311-${{ matrix.os == 'windows-latest' && 'win_amd64' || matrix.os == 'macos-latest' && 'macosx_arm64' || 'manylinux_x86_64' }} -v
       - name: Debug dist contents
         if: always()
         shell: pwsh
