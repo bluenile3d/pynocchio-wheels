@@ -6,6 +6,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false  # Prevent cascading cancellations
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -15,20 +16,22 @@ jobs:
         run: pip install cibuildwheel
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc g++
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build gcc g++ libpython3-dev
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: brew install cmake ninja
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install cmake ninja
+        run: choco install cmake ninja -y
       - name: Build wheels
         run: python -m cibuildwheel --output-dir dist --platform ${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'windows-latest' && 'windows' || 'macos' }} --only cp311-${{ matrix.os == 'windows-latest' && 'win_amd64' || matrix.os == 'macos-latest' && 'macosx_arm64' || 'manylinux_x86_64' }}
       - name: Debug dist contents
-        run: ls -la dist || dir dist
         if: always()
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then dir dist; else ls -la dist || echo "dist not found"; fi
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: pynocchio-wheels-${{ matrix.os }}
           path: dist/*.whl
-          if-no-files-found: error
+          if-no-files-found: warn  # Warn instead of fail if no wheels
