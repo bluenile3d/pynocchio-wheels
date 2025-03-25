@@ -7,22 +7,25 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4  # Update to v4 while we’re at it
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Install cibuildwheel
         run: pip install cibuildwheel
-      - name: Install dependencies (Linux/macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install cmake ninja
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: choco install cmake ninja
       - name: Build wheels
-        run: cibuildwheel --output-dir dist
-      - uses: actions/upload-artifact@v4  # Updated to v4
+        run: python -m cibuildwheel --output-dir dist
+      - uses: actions/upload-artifact@v4
         with:
-          name: pynocchio-wheels-${{ matrix.os }}  # Unique name per OS
-          path: dist/*.whl  # Adjusted path syntax
-          if-no-files-found: error  # Fail if no wheels are found
+          name: pynocchio-wheels-${{ matrix.os }}
+          path: dist/*.whl
+          if-no-files-found: error
