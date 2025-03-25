@@ -7,6 +7,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
+    env:
+      CIBW_BUILD_VERBOSITY: 3  # Enable verbose output
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -24,7 +26,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install cmake ninja -y
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir dist --only cp311-${{ matrix.os == 'windows-latest' && 'win_amd64' || matrix.os == 'macos-latest' && 'macosx_arm64' || 'manylinux_x86_64' }} -v
+        run: python -m cibuildwheel --output-dir dist --only cp311-${{ matrix.os == 'windows-latest' && 'win_amd64' || matrix.os == 'macos-latest' && 'macosx_arm64' || 'manylinux_x86_64' }}
       - name: Debug dist contents
         if: always()
         shell: pwsh
